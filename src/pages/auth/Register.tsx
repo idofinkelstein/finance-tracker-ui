@@ -12,7 +12,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { authService } from "../services/authService";
+import { authService } from "../../services/authService";
 
 const validationSchema = Yup.object({
   username: Yup.string().required("שדה חובה"),

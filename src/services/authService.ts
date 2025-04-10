@@ -48,4 +48,8 @@ export const authService = {
   getCurrentToken() {
     return localStorage.getItem("token");
   },
+  
+  getBaseApiUrl() {
+    return API_URL;
+  }
 };

@@ -3,7 +3,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { authService } from '../services/authService';
+import { authService } from '../../services/authService';
 
 const validationSchema = Yup.object({
   uernameOrEmail: Yup.string()
@@ -30,7 +30,7 @@ const Login = () => {
         setIsLoading(true);
         setError('');
         await authService.login(values);
-        navigate('/welcome'); // שנה את זה לנתיב שאליו תרצה לנווט לאחר התחברות מוצלחת
+        navigate('/transactions'); // שנה את זה לנתיב שאליו תרצה לנווט לאחר התחברות מוצלחת
       } catch (err: any) {
         setError(err.response?.data?.message || 'שגיאה בהתחברות');
       } finally {
