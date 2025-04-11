@@ -17,9 +17,9 @@ import TransactionApiResponse from "../../models/transaction-api";
 const TransactionDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [transaction, setTransaction] = useState<TransactionApiResponse | null>(null);
+  const token = authService.getCurrentToken();
 
   const fetchTransaction = async () => {
-    const token = authService.getCurrentToken();
     const response = await axios.get<TransactionApiResponse>(
       authService.getBaseApiUrl() + `/transactions/${id}`,
       {
@@ -33,7 +33,12 @@ const TransactionDetail: React.FC = () => {
 
   const handleDelete = async () => {
     if (transaction) {
-      await axios.delete(`/api/transactions/${transaction.id}`);
+      await axios.delete(authService.getBaseApiUrl() + `/transactions/${transaction.id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       // Redirect or update UI after deletion
     }
   };
