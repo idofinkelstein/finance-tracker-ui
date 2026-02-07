@@ -8,7 +8,6 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   const theme = useTheme();
-
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <NavigationBar />
@@ -19,7 +18,7 @@ const Layout = ({ children }: LayoutProps) => {
           p: 3,
           width: { sm: `calc(100% - 250px)` },
           marginLeft: { sm: '250px' },
-          marginTop: '64px', // Height of AppBar
+          marginTop: theme.mixins.toolbar.minHeight ?? '64px',
         }}
       >
         <Container maxWidth="lg">
