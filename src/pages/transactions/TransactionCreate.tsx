@@ -5,15 +5,6 @@ import { authService } from '../../services/authService';
 import TransactionApiResponse from '../../models/transaction-api';
 import CategoryApiResponse from '../../models/category-api';
 
-const formatDate = (date: Date) => {
-    const formatter = new Intl.DateTimeFormat('en-GB', { // use 'en-GB' for dd/MM/yyyy
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-    return formatter.format(date);
-}
-
 const TransactionCreate: React.FC = () => {
     const [transaction, setTransaction] = useState<TransactionApiResponse>({
         amount: 0,
@@ -23,6 +14,8 @@ const TransactionCreate: React.FC = () => {
     });
 
     const [categories, setCategories] = useState<CategoryApiResponse[]>([]); // State to store categories
+    const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
 
     // Fetch categories from the API
     const fetchCategories = async () => {
@@ -42,22 +35,53 @@ const TransactionCreate: React.FC = () => {
         const { name, value } = e.target;
         if (name === 'date') {
             console.log(value);
-        } 
+        }
+        if (name === 'amount') {
+            const num = parseFloat(value);
+            const clamped = Number.isNaN(num) ? 0 : Math.max(0, num);
+            setTransaction(prev => ({ ...prev, amount: clamped }));
+            return;
+        }
         setTransaction(prev => ({
             ...prev,
-            [name]: name === 'amount' ? parseFloat(value) : name === 'date' ? new Date(value) : value
+            [name]: name === 'date' ? new Date(value) : value
         }));
     };
 
     const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedCategoryId = e.target.value;
-        const selectedCategory = categories.find(category => category.id === Number(selectedCategoryId));
-        console.log(selectedCategory);
+        const value = e.target.value;
+        if (value === '__new__') {
+            setShowNewCategoryInput(true);
+            setTransaction(prev => ({ ...prev, categoryId: undefined, categoryResponse: undefined }));
+            return;
+        }
+        setShowNewCategoryInput(false);
+        const selectedCategoryId = value ? Number(value) : undefined;
+        const selectedCategory = selectedCategoryId ? categories.find(c => c.id === selectedCategoryId) : undefined;
         setTransaction(prev => ({
             ...prev,
-            categoryId: Number(selectedCategoryId),
+            categoryId: selectedCategoryId,
             categoryResponse: selectedCategory,
         }));
+    };
+
+    const handleAddNewCategory = async () => {
+        const name = newCategoryName.trim();
+        if (!name) return;
+        try {
+            const response = await axios.post<CategoryApiResponse>(authService.getBaseApiUrl() + '/categories', { name });
+            const created = response.data;
+            await fetchCategories();
+            setTransaction(prev => ({
+                ...prev,
+                categoryId: created.id,
+                categoryResponse: created,
+            }));
+            setNewCategoryName('');
+            setShowNewCategoryInput(false);
+        } catch (error) {
+            console.error('Error creating category:', error);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -76,21 +100,38 @@ const TransactionCreate: React.FC = () => {
 
     return (
         <form onSubmit={handleSubmit}>
-            <input type="number" name="amount" value={transaction.amount} onChange={handleChange} placeholder="Amount" />
+            <input type="number" name="amount" min={0} step="1" value={transaction.amount} onChange={handleChange} placeholder="Amount" />
             <input type="date" name="date" value={formatDateForInput(transaction.date)} onChange={handleChange} />
             <input type="text" name="description" value={transaction.description} onChange={handleChange} placeholder="Description" />
             <select name="transactionType" value={transaction.transactionType} onChange={handleChange}>
                 <option value={'INCOME'}>Income</option>
                 <option value={'EXPENSE'}>Expense</option>
             </select>
-            <select name="category" value={transaction.categoryId} onChange={handleCategoryChange}>
+            <select
+                name="category"
+                value={showNewCategoryInput ? '__new__' : (transaction.categoryId ?? '')}
+                onChange={handleCategoryChange}
+            >
                 <option value="">Select a category</option>
                 {categories.map(category => (
                     <option key={category.id} value={category.id}>
                         {category.name}
                     </option>
                 ))}
+                <option value="__new__">+ Add new category</option>
             </select>
+            {showNewCategoryInput && (
+                <div>
+                    <input
+                        type="text"
+                        value={newCategoryName}
+                        onChange={e => setNewCategoryName(e.target.value)}
+                        placeholder="New category name"
+                        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddNewCategory(); } }}
+                    />
+                    <button type="button" onClick={handleAddNewCategory}>Add category</button>
+                </div>
+            )}
             <button type="submit">Add Transaction</button>
         </form>
     );
