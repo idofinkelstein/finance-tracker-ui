@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material';
-import { DashboardWidget, BalanceOverTimeChart } from '../components/dashboard';
+import { DashboardWidget, BalanceOverTimeChart, ExpensesByCategoryChart } from '../components/dashboard';
 
 /**
  * Dashboard page: widget-based layout. Add new widgets by importing them and
@@ -13,11 +13,11 @@ const Dashboard = () => {
           <BalanceOverTimeChart />
         </DashboardWidget>
       </Grid>
-      {/* Add more widgets here, e.g.:
       <Grid item xs={12} md={6}>
-        <DashboardWidget title="Spending by category">...</DashboardWidget>
+        <DashboardWidget title="Expenses by category">
+          <ExpensesByCategoryChart />
+        </DashboardWidget>
       </Grid>
-      */}
     </Grid>
   );
 };
