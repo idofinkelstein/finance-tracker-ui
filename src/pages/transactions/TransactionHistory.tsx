@@ -4,12 +4,12 @@ import axios from "axios";
 import TransactionApiResponse from "../../models/transaction-api";
 import { authService } from "../../services/authService";
 
-const formatDate = (date: Date) => {
+function formatDate(date: Date) {
   const year = date.getFullYear();
   const month = (date.getMonth() + 1).toString().padStart(2, "0");
   const day = date.getDate().toString().padStart(2, "0");
   return `${day}/${month}/${year}`;
-};
+}
 
 const TransactionHistory: React.FC = () => {
   const [transactions, setTransactions] = useState<TransactionApiResponse[]>(
@@ -52,7 +52,7 @@ const TransactionHistory: React.FC = () => {
             <tr key={transaction.id}>
               <td>{transaction.amount}</td>
               <td>{transaction.category?.name}</td>
-              <td>{transaction.date.toLocaleString()}</td>
+              <td>{formatDate(new Date(transaction.date))}</td>
               <td>
                 <button
                   onClick={() => transaction.id && handleDelete(transaction.id)}
