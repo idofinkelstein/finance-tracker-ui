@@ -2,10 +2,14 @@ import axios from "axios";
 
 const API_URL = "http://localhost:8080/api";
 
-// הגדרת אינטרספטור גלובלי לכל הבקשות
+// Request interceptor: add auth token and common headers to every request
 axios.interceptors.request.use((config) => {
   config.headers["Accept"] = "application/json";
   config.headers["Content-Type"] = "application/json";
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers["Authorization"] = `Bearer ${token}`;
+  }
   return config;
 });
 
@@ -20,7 +24,7 @@ interface RegisterData {
   password: string;
 }
 
-export const authService = {
+export const authService = {  
   async login(data: LoginData) {
     const response = await axios.post(`${API_URL}/auth/login`, {
       usernameOrEmail: data.uernameOrEmail,

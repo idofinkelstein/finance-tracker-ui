@@ -15,17 +15,11 @@ const TransactionHistory: React.FC = () => {
   const [transactions, setTransactions] = useState<TransactionApiResponse[]>(
     []
   );
-  const token = authService.getCurrentToken();
 
   const fetchTransactions = async () => {
     try {
       const response = await axios.get<TransactionApiResponse[]>(
-        authService.getBaseApiUrl() + "/transactions",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        authService.getBaseApiUrl() + "/transactions"
       );
       setTransactions(response.data);
     } catch (error) {
@@ -33,11 +27,7 @@ const TransactionHistory: React.FC = () => {
     }
   };
   const handleDelete = async (id: number) => {
-    await axios.delete(authService.getBaseApiUrl() + `/transactions/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    await axios.delete(authService.getBaseApiUrl() + `/transactions/${id}`);
     fetchTransactions(); // Refresh the list
   };
 

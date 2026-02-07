@@ -1,9 +1,10 @@
 import { Box, Button, Container, TextField, Typography, Paper, Link, Alert } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { authService } from '../../services/authService';
+import { useAuth } from '../../context/AuthContext';
 
 const validationSchema = Yup.object({
   uernameOrEmail: Yup.string()
@@ -13,11 +14,18 @@ const validationSchema = Yup.object({
     .required('שדה חובה'),
 });
 
+interface LocationState {
+  from?: string;
+}
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const locationState = location.state as LocationState;
+  const from = locationState?.from || '/home';
 
   const formik = useFormik({
     initialValues: {
@@ -29,8 +37,14 @@ const Login = () => {
       try {
         setIsLoading(true);
         setError('');
-        await authService.login(values);
-        navigate('/transactions'); // שנה את זה לנתיב שאליו תרצה לנווט לאחר התחברות מוצלחת
+        const response = await authService.login(values);
+        const token = response?.token ?? response?.accessToken;
+        if (typeof token !== 'string' || !token.trim()) {
+          setError('שגיאה בהתחברות: לא התקבל אסימון מהשרת');
+          return;
+        }
+        login(token);
+        navigate(from, { replace: true });
       } catch (err: any) {
         setError(err.response?.data?.message || 'שגיאה בהתחברות');
       } finally {
