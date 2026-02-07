@@ -27,14 +27,8 @@ const TransactionCreate: React.FC = () => {
     // Fetch categories from the API
     const fetchCategories = async () => {
         try {
-            const token = authService.getCurrentToken();
-            const response = await axios.get<CategoryApiResponse[]>(authService.getBaseApiUrl() + '/categories', {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await axios.get<CategoryApiResponse[]>(authService.getBaseApiUrl() + '/categories');
             setCategories(response.data);
-            
         } catch (error) {
             console.error('Error fetching categories:', error);
         }
@@ -68,15 +62,8 @@ const TransactionCreate: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const token = authService.getCurrentToken();
-        const transactionData = {
-            ...transaction,
-        };
-        await axios.post(authService.getBaseApiUrl() + '/transactions', transactionData, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
+        const transactionData = { ...transaction };
+        await axios.post(authService.getBaseApiUrl() + '/transactions', transactionData);
         // Redirect or update UI after creation
     };
 
